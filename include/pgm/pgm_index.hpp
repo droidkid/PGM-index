@@ -63,6 +63,9 @@ struct ApproxPos {
  */
 template<typename K, size_t Epsilon = 64, size_t EpsilonRecursive = 4, typename Floating = float>
 class PGMIndex {
+public:
+    struct Segment;
+    std::vector<Segment> segments;      ///< The segments composing the index.
 protected:
     template<typename, size_t, size_t, uint8_t, typename>
     friend class BucketingPGMIndex;
@@ -71,11 +74,9 @@ protected:
     friend class EliasFanoPGMIndex;
 
     static_assert(Epsilon > 0);
-    struct Segment;
 
     size_t n;                           ///< The number of elements this index was built on.
     K first_key;                        ///< The smallest element.
-    std::vector<Segment> segments;      ///< The segments composing the index.
     std::vector<size_t> levels_offsets; ///< The starting position of each level in segments[], in reverse order.
 
     template<typename RandomIt>
