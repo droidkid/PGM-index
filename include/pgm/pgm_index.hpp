@@ -157,6 +157,13 @@ protected:
         return it;
     }
 
+    auto scan_level0_for_key(const K &key, uint64_t *from) const {
+        auto lo = segments.begin() + *from + levels_offsets[0];
+        for (; std::next(lo)->key <= key; ++lo, *from+=1)
+            continue;
+        return lo;
+    }
+
 public:
 
     static constexpr size_t epsilon_value = Epsilon;
@@ -193,6 +200,15 @@ public:
     ApproxPos search(const K &key) const {
         auto k = std::max(first_key, key);
         auto it = segment_for_key(k);
+        auto pos = std::min<size_t>((*it)(k), std::next(it)->intercept);
+        auto lo = PGM_SUB_EPS(pos, Epsilon);
+        auto hi = PGM_ADD_EPS(pos, Epsilon, n);
+        return {pos, lo, hi};
+    }
+
+    ApproxPos linearSearch(const K &key, uint64_t *from) const {
+        auto k = std::max(first_key, key);
+        auto it = scan_level0_for_key(k, from);
         auto pos = std::min<size_t>((*it)(k), std::next(it)->intercept);
         auto lo = PGM_SUB_EPS(pos, Epsilon);
         auto hi = PGM_ADD_EPS(pos, Epsilon, n);
